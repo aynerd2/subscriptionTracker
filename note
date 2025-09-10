@@ -1,0 +1,20 @@
+SUBCRIPTION TRACKER PROJECT
+
+PLATFORMS REGISTRATION
+i. Upstach - https://upstash.com/ 
+ii. Arcjet - https://arcjet.com/
+
+iii. https://httpie.io/download
+iv Mongodb - npm install mongodb
+v. Jweb token and bycript - npm install jsonwebtoken bcryptjs
+
+
+INSTALLATIONS
+1. install express generator - npx express-generator --no-view --git ./
+2. install nodemon - npm install --save-dev nodemon
+3. install EsLint - npx eslint --init
+4. install dotenv - npm install dotenv
+
+
+ROUTING
+
