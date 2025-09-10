@@ -1,20 +1,259 @@
-SUBCRIPTION TRACKER PROJECT
+# SUBCRIPTION TRACKER PROJECT
 
-PLATFORMS REGISTRATION
-i. Upstach - https://upstash.com/ 
-ii. Arcjet - https://arcjet.com/
+# PLATFORMS REGISTRATION
+# i. Upstach - https://upstash.com/ 
+# ii. Arcjet - https://arcjet.com/
 
-iii. https://httpie.io/download
-iv Mongodb - npm install mongodb
-v. Jweb token and bycript - npm install jsonwebtoken bcryptjs
-
-
-INSTALLATIONS
-1. install express generator - npx express-generator --no-view --git ./
-2. install nodemon - npm install --save-dev nodemon
-3. install EsLint - npx eslint --init
-4. install dotenv - npm install dotenv
+# iii. https://httpie.io/download
+# iv Mongodb - npm install mongodb
+# v. Jweb token and bycript - npm install jsonwebtoken bcryptjs
 
 
-ROUTING
+# INSTALLATIONS
+# 1. install express generator - npx express-generator --no-view --git ./
+# 2. install nodemon - npm install --save-dev nodemon
+# 3. install EsLint - npx eslint --init
+# 4. install dotenv - npm install dotenv
+
+
+# ROUTING
+
+# https://meet.google.com/orq-hcjg-pvp?authuser=0&hs=179
+# Note: 
+# iii. https://httpie.io/download
+# iv Mongodb - npm install mongodb
+# v. Jweb token and bycript - npm install jsonwebtoken bcryptjs
+
+
+
+
+
+
+
+
+# //CONTROLLERS
+
+# //users.controllers.js
+# import User from "../models/users.model.js";
+
+
+# export const getUsers = async (req, res, next)=>{
+
+#       try {
+
+#       const users = await User.find();
+#       res.status(200).json({
+#             success: true,
+#             message: 'Users fetched successful',
+#             data: users
+#       })
+
+#       } catch (error) {
+#             next(error)
+#       }
+# }
+
+
+# export const getUserById = async (req, res, next)=>{
+
+#       try {
+
+#       const user = await User.findById(req.params.id).select('-password');
+
+#       if(!user){
+#             const error = new Error('User not found');
+#             error.statusCode = 404;
+#             throw error;
+#       }
+
+#       res.status(200).json({
+#             success: true,
+#             message: 'User fetched successful',
+#             data: user
+#       })
+
+#       } catch (error) {
+#             next(error)
+#       }
+# }
+
+
+# //auth.controllers.js
+# import mongoose from "mongoose";
+# import User from "../models/users.model.js";
+# import bcrypt from 'bcryptjs';
+# import jwt from 'jsonwebtoken';
+# import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
+
+
+# export const signUp = async (req,res,next) => {
+#       const seasion = await mongoose.startSession();
+#       seasion.startTransaction();
+#       try {
+#             // get user data from req.body
+#             const {name, email, password} = req.body;
+
+#             // validate user data and check if user already exists
+#             const existingUser = await User.findOne({email}).session(seasion);
+#             if(existingUser){
+#                   const error = new Error('User already exists');
+#                   error.statusCode = 400;
+#                   throw error;
+#             };
+
+#             // hard part: hash password
+#             const salt = await bcrypt.genSalt(10);
+#             const hashedPassword = await bcrypt.hash(password, salt);
+
+#             // Create new user
+#             const newUser = await User.create([{
+#                   name,
+#                   email,
+#                   password: hashedPassword
+#             }], {session: seasion});
+
+#             const token = jwt.sign(
+#                   {userId: newUser[0]._id, email: newUser[0].email}, 
+#                   JWT_SECRET, 
+#                   {expiresIn: JWT_EXPIRES_IN}
+#             );
+            
+#             await seasion.commitTransaction();
+#             seasion.endSession();
+
+#             res.status(201).json({
+#                   success: true,
+#                   message: 'User created successfully',
+#                   data: {
+#                         token,
+#                         user: newUser[0]._id,
+#                   }
+
+#             });
+
+
+#       }catch (error) {
+#             await seasion.abortTransaction();
+#             seasion.endSession();
+#             return next(error);
+#       }
+# };
+
+
+
+
+
+
+
+
+
+
+# //auth.middleware.js
+# import jwt from "jsonwebtoken";
+# import { JWT_SECRET } from "../config/env.js";
+# import User from "../models/users.model.js";
+
+
+# const authorize = async (req, res, next) =>{
+
+#       try {
+#             let token;
+#             if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+#                   token = req.headers.authorization.split(' ')[1];
+#             }
+#             if(!token) return res.status(401).json({message: 'Unauthorized'});
+#             const decoded = jwt.verify(token, JWT_SECRET)
+#             const user = await User.findById(decoded.user) 
+#             if(!user) return res.status(401).json({message: 'Unauthorized User'});
+#             req.user = user;
+#             next()
+#       } catch (error) {
+#             res.status(401).json({
+#                   message: "Unauthorized",
+#                   error: error.message
+#             })
+#       }
+# }
+
+
+# export default authorize;
+
+
+
+
+
+# //env.development.local
+# #JWT AUTH
+# JWT_SECRET="secretkey"
+# JWT_EXPIRES_IN="7d"
+
+# #ARCJET
+# ARCJET_ENV=development
+# ARCJET_KEY="ajkey_01k4mcnpq1emvv06whwatwmhym"
+
+# #TOKEN - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGMwZGRiNzU3YmRiZWNkZjZhNzU4NzgiLCJlbWFpbCI6Im9sYXdhbGVheW93YW5kZUBnbWFpLmNvbSIsImlhdCI6MTc1NzQ3MDEzNiwiZXhwIjoxNzU4MDc0OTM2fQ.rPi-QMdq5_sLj5GIkA6QpcKPheQaq8adFFHOPLUUc2Y
+# #USER_ID=68c0ddb757bdbecdf6a75878
+
+
+
+# //auth.routes.js
+# import { Router } from "express";
+# import { signIn, signOut, signUp } from "../controllers/auth.controller.js";
+
+
+# const authRouter = Router()
+
+
+# // POST /auth/sign-up => user sign up
+# // POST /auth/sign-in => user sign in
+# // POST /auth/sign-out => user sign out
+
+# authRouter.post('/sign-up', signUp)
+
+# authRouter.post('/sign-in', signIn)
+
+# authRouter.post('/sign-out', signOut)
+
+
+
+# export default authRouter;
+
+
+
+
+# //user.routes.js
+# import { Router } from "express";
+# import { getUsers, getUserById } from "../controllers/users.controller.js";
+# import authorize from "../middlewares/auth.middleware.js";
+
+# const userRouter = Router();
+
+# // GET /users => get all users
+# // GET /users/:id => get user by id
+# // POST /users => create a new user
+# // PUT /users/:id => update user by id
+# // DELETE /users/:id => delete user by id
+
+# userRouter.get('/',getUsers)
+
+
+# userRouter.get('/:id', authorize, getUserById)
+
+
+# userRouter.post('/', )
+
+
+
+# userRouter.put('/:id', (req,res)=>{
+#       res.send({title: 'UPDATE user'})
+# })
+
+
+# userRouter.delete('/:id', (req,res)=>{
+#       res.send({title: 'DELETE user'})
+# })
+
+# export default userRouter;
+
+
 
